@@ -1,13 +1,12 @@
 $(function () {
     let cssLibs = require("./loadStyleLibs");
     let jsLibs = require("./loadJSLibs");
-    let pages = require("./loadPages");
+    let pages = require("./pages");
     let smart = {
         onInit: function () {
             let reference = this;
             $("link").remove();
             $("script").remove();
-
             cssLibs.loadFonts.then(function () {
                 console.log("Fonts libs were loaded");
                 return cssLibs.loadIcons;
@@ -33,7 +32,10 @@ $(function () {
                 })
                 .then(function () {
                     console.log("JS Low 2 were loaded");
-                    return pages.loadAllPages();
+                    return pages.loadAllPages()
+                }).then(function(data){
+                    console.log("Pages :" , data );
+                    return pages.bootstrapMenu();
                 });
         }
     }

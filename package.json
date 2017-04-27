@@ -1,0 +1,19 @@
+{
+  "name": "sd_med",
+  "version": "1.0.0",
+  "description": "",
+  "main": "InitApplication.js",
+  "scripts": {
+    "start": "webpack InitApplication.js ./bundle.txt"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/SebasG22/SM_MED.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/SebasG22/SM_MED/issues"
+  },
+  "homepage": "https://github.com/SebasG22/SM_MED#readme"
+}
