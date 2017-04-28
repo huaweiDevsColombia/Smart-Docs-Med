@@ -3,6 +3,7 @@ console.log("Pages" + pages);
 
 module.exports = {
     templateSelected: "",
+    templateResponse: "",
     loadTemplates: function () {
         let reference = this;
         return new Promise(function (resolve, reject) {
@@ -25,5 +26,40 @@ module.exports = {
             http.send(params);
         });
     },
-    
+    loadTemplate: function (web_location, pdf_location) {
+        let reference = this;
+        return new Promise(function (resolve, reject) {
+            var responseWebJson;
+            var response = [];
+
+            var promise = get(web_location);
+            promise.then(function (jsonWebResponse) {
+                responseWebJson = jsonWebResponse;
+                return get(pdf_location);
+            }).then(function (jsonPdfResponse) {
+                response.push({ jsonWeb: responseWebJson, jsonPdf: jsonPdfResponse });
+                reference.templateResponse = response;
+                resolve(response);
+            });
+            function get(location) {
+                return new Promise(function (resolve, reject) {
+                    var url = "https://104a-app.teleows.com/servicecreator/fileservice" + location;
+                    var xhttp = new XMLHttpRequest();
+                    xhttp.open("POST", url, true);
+                    xhttp.responseType = 'json';
+                    xhttp.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
+                    xhttp.onreadystatechange = function () {//Call a function when the state changes.
+                        if (xhttp.readyState == 4 && xhttp.status == 200) {
+                            resolve(xhttp.response);
+                        }
+                    }
+                    xhttp.onerror = function () {
+                        reject(xhttp.statusText);
+                    };
+                    xhttp.send();
+                })
+            }
+        });
+
+    }
 }
