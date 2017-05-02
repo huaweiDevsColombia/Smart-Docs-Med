@@ -1,50 +1,9 @@
 
-/**
- * Get the information from Users Datamodel
- * Make a Ajax Request to get the worker and then call get user service
- */
-function getUserInformation() {
-    return new Promise(function (resolve, reject) {
-        let workerUserInformation = $.ajax({
-            method: "GET",
-            dataType: "script",
-            url: "https://100l-app.teleows.com/servicecreator/fileservice/get?batchId=3e9d8bc0-999e-434f-aeeb-dda673659611&attachmentId=88315474-b2b2-4751-9e8a-2ab077c8ac94",
-            cache: false
-        });
-        $.when(workerUserInformation).done(function (workerUserInformationResponse) {
-            $('<script>')
-                .attr('type', 'javascript/worker')
-                .attr('id', 'workerUserInformation')
-                .text(workerUserInformationResponse)
-                .appendTo('head');
-
-            let blob = new Blob([
-                $("#workerUserInformation").text()
-            ], { type: "text/javascript" })
-            var worker = new Worker(URL.createObjectURL(blob));
-
-            worker.addEventListener('message', function (e) {
-                resolve(e.data);
-            }, false);
-
-            worker.postMessage({ "username": username, "userId": USER_ID, "token": csrfToken, "tenantId": tenantId }); // Send data to our worker.
-
-            console.log("[Wk] - User Information has Loaded");
-
-        }).fail(function (error) {
-            console.log("[Wk] - User Information User has Failed");
-            reject(error);
-        });
-    });
-}
 
 
 
 module.exports = {
-    
-    getUserInformation: getUserInformation(),
-    
-    
+         
     getTemplates:
     /**
  * Get the templates from Templates Datamodel
@@ -131,7 +90,7 @@ module.exports = {
             let workerloadPDF = $.ajax({
                 method: "GET",
                 dataType: "script",
-                url: "https://104a-app.teleows.com/servicecreator/fileservice/get?batchId=74bf4e14-16ba-4f3a-9207-ff70bdc73fc6&attachmentId=4d43f3ca-3688-432f-9339-6df2e54443a8",
+                url: "https://104a-app.teleows.com/servicecreator/fileservice/get?batchId=91f3dbe1-2158-4071-a257-93a83637ec14&attachmentId=98949b82-667c-4043-8302-6626a3fad42c",
                 cache: false
             });
             $.when(workerloadPDF).done(function (workerloadPDFResponse) {

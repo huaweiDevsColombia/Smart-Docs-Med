@@ -37,6 +37,7 @@ module.exports = {
             /*reference.addEventsToMenuItems();*/
             reference.loadNavBar();
             reference.makeProgressive();
+            reference.addEventsToMenu();
             message.changeMessageLoader("loaderMessage", "El Menu Principal ha sido cargado correctamente");
             return reference.filterPage("page-003");
         }).then(function (pageCode) {
@@ -102,7 +103,25 @@ module.exports = {
         $("head").append("<meta name='mobile-web-app-capable' content='yes'>");
         //$("head").append("<link rel='icon' sizes='192x192' href='https://100l-app.teleows.com/servicecreator/fileservice/get?batchId=6296cedb-8b8b-4d71-8b18-2985a3cc43e6&attachmentId=666870'>");
     },
-
+    addEventsToMenu: function () {
+        let reference = this;
+        $("#itemInicio").click(function () {
+            reference.hideNavBar();
+            reference.filterPage("page-003").then(function (pageCode) {
+                $("#pageName").text("Inicio");
+                reference.changeMainContent(pageCode);
+                message.changeMessageLoader("loaderMessage", "Consultando Plantillas en @OWS Datamodel");
+                return templates.loadTemplates();
+            }).then(function (templates) {
+                reference.changeTemplatesPage(templates);
+                message.removeMessageLoader("#mainContent2");
+            });
+        });
+    },
+    hideNavBar: function () {
+        $(".app-container").removeClass("expanded");
+        $(".navbar-expand-toggle").removeClass("fa-rotate-90");
+    },
     changeTemplatesPage: function (allTemplates) {
         let reference = this;
         let cont = 0;
@@ -117,10 +136,11 @@ module.exports = {
                         template_date: template.template_date,
                         template_pdf: "/get?batchId=" + template.template_pdf.attachment[0].batchId + "&attachmentId=" + template.template_pdf.attachment[0].attachmentId,
                         template_web: "/get?batchId=" + template.template_web.attachment[0].batchId + "&attachmentId=" + template.template_web.attachment[0].attachmentId,
+                        template_name: template.template_name_web,
                         author: template.author
                     }
                 }, function (event) {
-                    let templateSelected = { "template_web": event.data.val.template_web, "template_pdf": event.data.val.template_pdf };
+                    let templateSelected = { "template_web": event.data.val.template_web, "template_pdf": event.data.val.template_pdf, "template_name":event.data.val.template_name };
                     templates.templateSelected = templateSelected;
                     reference.filterPage("page-004").then(function (pageCode) {
                         $("#pageName").text("Edicion Reporte");
@@ -148,11 +168,11 @@ module.exports = {
             console.log("Save Answer", answer);
             let userAnswer = JSON.parse(answer.userAnswer);
             if (answer.completed) {
-                    reference.launchAnswerCompletedModal();
-                }
-                else {
-                    reference.launchAnswerInCompleteModal(answer.fieldsEmpty);
-                }
+                reference.launchAnswerCompletedModal();
+            }
+            else {
+                reference.launchAnswerInCompleteModal(answer.fieldsEmpty);
+            }
             worker.loadPDF(templates.templateResponse[0].jsonPdf, "Test Template", true, "No Ticket", userAnswer, username).then(function (loadPdfResponse) {
                 console.log("Pdf Response was correct");
                 //console.log(loadPdfResponse);
@@ -166,8 +186,8 @@ module.exports = {
                     text["link"] = "https://104a-app.teleows.com/servicecreator/spl/CO_SMART_DOCS_MED/CO_SMART_DOCS__MED_PRODUCTION.spl";
                     return text;
                 };
-                
-                pdfMake.createPdf(preview_pdf).download("pdf Works" + ".pdf");
+
+                pdfMake.createPdf(preview_pdf).download(templates.templateSelected.template_name + ".pdf");
                 reference.filterPage("page-003").then(function () {
                     message.removeMessageLoader("#mainContent2");
                 });

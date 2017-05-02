@@ -29,20 +29,9 @@ self.addEventListener('message', function (e) {
 
     var answers = JSON.parse(data.answers);
     //Pass all the answer here to generate the match
-    answers.forEach(function (answer, index) {
-        console.log("Continua Index : " + index);
-        if (Array.isArray(answer[0])) {
-            matchAnswers(answer[0]);
-        }
-        if (index == answers.length - 1) {
-            console.log("Finaliza Index: " + index);
-            if (Array.isArray(answer[0])) {
-                matchAnswers(answer[0]);
-            }
-            console.log("Enviando Data", template_PDF);
-            self.postMessage(JSON.stringify(template_PDF));
-        }
-    });
+    matchAnswers(answers);
+    console.log("Enviando Data", template_PDF);
+    self.postMessage(JSON.stringify(template_PDF));
 
     function matchAnswers(answer) {
         template_PDF.content.forEach(function (item) {
@@ -67,17 +56,17 @@ self.addEventListener('message', function (e) {
                                     tablesValues.forEach(function (tableItem) {
                                         /* Order Array ASCEDENT or DESCENDENT */
                                         if (item.table.order == 'ASC') {
-                                            
+
                                             tableItem.sort(function (a, b) {
                                                 return a[1] > b[1]
                                             })
-                                            
+
                                         }
-                                        else if (item.table.order == 'DESC') {                                            
+                                        else if (item.table.order == 'DESC') {
                                             tableItem.reverse(function (a, b) {
                                                 return a[1] > b[1]
                                             });
-                                            
+
                                         }
 
                                         /* Adding the first column to row */

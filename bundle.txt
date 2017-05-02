@@ -137,6 +137,7 @@ module.exports = {
             /*reference.addEventsToMenuItems();*/
             reference.loadNavBar();
             reference.makeProgressive();
+            reference.addEventsToMenu();
             message.changeMessageLoader("loaderMessage", "El Menu Principal ha sido cargado correctamente");
             return reference.filterPage("page-003");
         }).then(function (pageCode) {
@@ -202,7 +203,25 @@ module.exports = {
         $("head").append("<meta name='mobile-web-app-capable' content='yes'>");
         //$("head").append("<link rel='icon' sizes='192x192' href='https://100l-app.teleows.com/servicecreator/fileservice/get?batchId=6296cedb-8b8b-4d71-8b18-2985a3cc43e6&attachmentId=666870'>");
     },
-
+    addEventsToMenu: function () {
+        let reference = this;
+        $("#itemInicio").click(function () {
+            reference.hideNavBar();
+            reference.filterPage("page-003").then(function (pageCode) {
+                $("#pageName").text("Inicio");
+                reference.changeMainContent(pageCode);
+                message.changeMessageLoader("loaderMessage", "Consultando Plantillas en @OWS Datamodel");
+                return templates.loadTemplates();
+            }).then(function (templates) {
+                reference.changeTemplatesPage(templates);
+                message.removeMessageLoader("#mainContent2");
+            });
+        });
+    },
+    hideNavBar: function () {
+        $(".app-container").removeClass("expanded");
+        $(".navbar-expand-toggle").removeClass("fa-rotate-90");
+    },
     changeTemplatesPage: function (allTemplates) {
         let reference = this;
         let cont = 0;
@@ -217,10 +236,11 @@ module.exports = {
                         template_date: template.template_date,
                         template_pdf: "/get?batchId=" + template.template_pdf.attachment[0].batchId + "&attachmentId=" + template.template_pdf.attachment[0].attachmentId,
                         template_web: "/get?batchId=" + template.template_web.attachment[0].batchId + "&attachmentId=" + template.template_web.attachment[0].attachmentId,
+                        template_name: template.template_name_web,
                         author: template.author
                     }
                 }, function (event) {
-                    let templateSelected = { "template_web": event.data.val.template_web, "template_pdf": event.data.val.template_pdf };
+                    let templateSelected = { "template_web": event.data.val.template_web, "template_pdf": event.data.val.template_pdf, "template_name":event.data.val.template_name };
                     templates.templateSelected = templateSelected;
                     reference.filterPage("page-004").then(function (pageCode) {
                         $("#pageName").text("Edicion Reporte");
@@ -248,11 +268,11 @@ module.exports = {
             console.log("Save Answer", answer);
             let userAnswer = JSON.parse(answer.userAnswer);
             if (answer.completed) {
-                    reference.launchAnswerCompletedModal();
-                }
-                else {
-                    reference.launchAnswerInCompleteModal(answer.fieldsEmpty);
-                }
+                reference.launchAnswerCompletedModal();
+            }
+            else {
+                reference.launchAnswerInCompleteModal(answer.fieldsEmpty);
+            }
             worker.loadPDF(templates.templateResponse[0].jsonPdf, "Test Template", true, "No Ticket", userAnswer, username).then(function (loadPdfResponse) {
                 console.log("Pdf Response was correct");
                 //console.log(loadPdfResponse);
@@ -266,8 +286,8 @@ module.exports = {
                     text["link"] = "https://104a-app.teleows.com/servicecreator/spl/CO_SMART_DOCS_MED/CO_SMART_DOCS__MED_PRODUCTION.spl";
                     return text;
                 };
-                
-                pdfMake.createPdf(preview_pdf).download("pdf Works" + ".pdf");
+
+                pdfMake.createPdf(preview_pdf).download(templates.templateSelected.template_name + ".pdf");
                 reference.filterPage("page-003").then(function () {
                     message.removeMessageLoader("#mainContent2");
                 });
@@ -538,52 +558,11 @@ module.exports = {
 /***/ (function(module, exports) {
 
 
-/**
- * Get the information from Users Datamodel
- * Make a Ajax Request to get the worker and then call get user service
- */
-function getUserInformation() {
-    return new Promise(function (resolve, reject) {
-        let workerUserInformation = $.ajax({
-            method: "GET",
-            dataType: "script",
-            url: "https://100l-app.teleows.com/servicecreator/fileservice/get?batchId=3e9d8bc0-999e-434f-aeeb-dda673659611&attachmentId=88315474-b2b2-4751-9e8a-2ab077c8ac94",
-            cache: false
-        });
-        $.when(workerUserInformation).done(function (workerUserInformationResponse) {
-            $('<script>')
-                .attr('type', 'javascript/worker')
-                .attr('id', 'workerUserInformation')
-                .text(workerUserInformationResponse)
-                .appendTo('head');
-
-            let blob = new Blob([
-                $("#workerUserInformation").text()
-            ], { type: "text/javascript" })
-            var worker = new Worker(URL.createObjectURL(blob));
-
-            worker.addEventListener('message', function (e) {
-                resolve(e.data);
-            }, false);
-
-            worker.postMessage({ "username": username, "userId": USER_ID, "token": csrfToken, "tenantId": tenantId }); // Send data to our worker.
-
-            console.log("[Wk] - User Information has Loaded");
-
-        }).fail(function (error) {
-            console.log("[Wk] - User Information User has Failed");
-            reject(error);
-        });
-    });
-}
 
 
 
 module.exports = {
-    
-    getUserInformation: getUserInformation(),
-    
-    
+         
     getTemplates:
     /**
  * Get the templates from Templates Datamodel
@@ -670,7 +649,7 @@ module.exports = {
             let workerloadPDF = $.ajax({
                 method: "GET",
                 dataType: "script",
-                url: "https://104a-app.teleows.com/servicecreator/fileservice/get?batchId=74bf4e14-16ba-4f3a-9207-ff70bdc73fc6&attachmentId=4d43f3ca-3688-432f-9339-6df2e54443a8",
+                url: "https://104a-app.teleows.com/servicecreator/fileservice/get?batchId=91f3dbe1-2158-4071-a257-93a83637ec14&attachmentId=98949b82-667c-4043-8302-6626a3fad42c",
                 cache: false
             });
             $.when(workerloadPDF).done(function (workerloadPDFResponse) {
@@ -1614,7 +1593,7 @@ module.exports = {
                                         "<h3>" + valueSubPanelEle.labels.firstLabel + "<a class='anchorjs-link' href='#thumbnail-label'><span class='anchorjs-icon'></span></a></h3>" +
                                         "<img width='450' height='600' style='width: 450px;height: 600px' src='" + defaultImg + "' class='" + valueSubPanelEle.class + "' id='" + valueSubPanelEle.id + "'>" +
                                         "<div class='caption'> <h3>" + valueSubPanelEle.labels.secondLabel + "<a class='anchorjs-link' href='#thumbnail-label'><span class='anchorjs-icon'></span></a></h3> " +
-                                        " <p><input type='file' id='" + valueSubPanelEle.id + "Event' accept='image/*' capture='camera'></p></div> </div>" +
+                                        " <p><input type='file' id='" + valueSubPanelEle.id + "Event' accept='image/*'></p></div> </div>" +
                                         "</div>");
 
 
@@ -1721,7 +1700,7 @@ module.exports = {
     "<div id='" + valueSubPanelEle.idDiv + "' class='thumbnail' align='center'>" +
     "<img width='450' height='600' style='width: 450px;height: 600px' src='" + defaultImg + "' class='" + valueSubPanelEle.class + "' id='" + valueSubPanelEle.id + "'>" +
     "<div class='caption'> <h3>" + valueSubPanelEle.labels.firstLabel + "<a class='anchorjs-link' href='#thumbnail-label'><span class='anchorjs-icon'></span></a></h3> " +
-    " <p><input type='file' id='" + valueSubPanelEle.id + "Event' accept='image/*'     capture='camera'></p></div> </div>" +
+    " <p><input type='file' id='" + valueSubPanelEle.id + "Event' accept='image/*'></p></div> </div>" +
     "</div>");
 
     reference.allInputs.push({ 'name': valueSubPanelEle.label.value, 'selector': valueSubPanelEle.id, "type": valueSubPanelEle.type, "required": valueSubPanelEle.required });

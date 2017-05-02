@@ -28,7 +28,7 @@
                     </button>
                 </div>
                 <ul class="nav navbar-nav">
-                    <li id="itemInicio" style="cursor: pointer">
+                    <li id="itemInicio" class="active" style="cursor: pointer">
                         <a>
                             <span class="icon fa fa-tachometer"></span><span class="title">Inicio</span>
                         </a>
